@@ -1,0 +1,430 @@
+---
+title: "Project #1: The Relationship between Winning Party, Unemployment Rate, Poverty Rate, and Education Levels"
+author: "Ching Yi Lam"
+date: "9/16/2024"
+output:
+  html_document: 
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    number_sections: yes
+    toc_collapsed: yes
+    code_folding: show
+    code_download: yes
+    smooth_scroll: yes
+    theme: lumen
+  word_document: 
+    toc: yes
+    toc_depth: 4
+    fig_caption: yes
+    keep_md: yes
+  pdf_document: 
+    toc: yes
+    toc_depth: 4
+    fig_caption: yes
+    number_sections: yes
+    fig_width: 3
+    fig_height: 3
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{=html}
+
+<style type="text/css">
+
+/* Cascading Style Sheets (CSS) is a stylesheet language used to describe the presentation of a document written in HTML or XML. it is a simple mechanism for adding style (e.g., fonts, colors, spacing) to Web documents. */
+
+h1.title {  /* Title - font specifications of the report title */
+  font-size: 24px;
+  font-weight: bold;
+  color: DarkRed;
+  text-align: center;
+  font-family: "Gill Sans", sans-serif;
+}
+h4.author { /* Header 4 - font specifications for authors  */
+  font-size: 20px;
+  font-weight: bold;
+  font-family: system-ui;
+  color: DarkRed;
+  text-align: center;
+}
+h4.date { /* Header 4 - font specifications for the date  */
+  font-size: 18px;
+  font-weight: bold;
+  font-family: system-ui;
+  color: DarkBlue;
+  text-align: center;
+}
+h1 { /* Header 1 - font specifications for level 1 section title  */
+    font-size: 20px;
+    font-weight: bold;
+    font-family: "Times New Roman", Times, serif;
+    color: navy;
+    text-align: center;
+}
+h2 { /* Header 2 - font specifications for level 2 section title */
+    font-size: 18px;
+    font-weight: bold;
+    font-family: "Times New Roman", Times, serif;
+    color: navy;
+    text-align: left;
+}
+
+h3 { /* Header 3 - font specifications of level 3 section title  */
+    font-size: 16px;
+    font-weight: bold;
+    font-family: "Times New Roman", Times, serif;
+    color: navy;
+    text-align: left;
+}
+
+h4 { /* Header 4 - font specifications of level 4 section title  */
+    font-size: 14px;
+    font-weight: bold;
+    font-family: "Times New Roman", Times, serif;
+    color: darkred;
+    text-align: left;
+}
+
+body { background-color:white; }
+
+.highlightme { background-color:yellow; }
+
+p { background-color:white; }
+
+</style>
+```
+
+
+```{r setup, include=FALSE}
+# code chunk specifies whether the R code, warnings, and output 
+# will be included in the output files.
+if (!require("knitr")) {
+   install.packages("knitr")
+   library(knitr)
+}
+if (!require("MASS")) {
+   install.packages("MASS")
+   library(MASS)
+}
+#if (!require("leaflet")) {
+ #  install.packages("leaflet")
+  # library(leaflet)
+#}
+if (!require("factoextra")) {
+   install.packages("factoextra")
+   library(factoextra)
+}
+if (!require("TSstudio")) {
+   install.packages("TSstudio")
+   library(TSstudio)
+}
+if (!require("plotrix")) {
+   install.packages("plotrix")
+library(plotrix)
+}
+if (!require("ggridges")) {
+   install.packages("ggridges")
+library(ggridges)
+}
+if (!require("tidyverse")) {
+   install.packages("tidyverse")
+library(tidyverse)
+}
+if (!require("GGally")) {
+   install.packages("GGally")
+library(GGally)
+}
+knitr::opts_chunk$set(echo = TRUE,   
+                      warning = FALSE,  
+                      result = TRUE,    
+                      message = FALSE,
+                      comment = NA
+                      )  
+```
+
+# Introduction
+
+The purpose of this project is to analysis 4 data sets: Presidential Election Data, Unemployment Data, Poverty Data, and Education Data. We combined those 4 data sets together to one data set and each county has only one record which is the winning party. Those 4 data sets are provided from the professor to do the analysis report.
+
+We want to see if there is any relationship between the winning party, the unemployment rate, the poverty rate, and the education levels.
+
+The first part of the project is data integration that we picked up specific data that we needed for doing the analysis. The second part of the project is to do an analysis for those data and create some statistical graphics to identify patterns and trends.
+
+We will use SQL to clean up the data and R Markdown to write the report and show the graphics.
+
+## Data Integration
+
+These are the information we included in the data set.
+
+### Presidential Election Data
+
+We kept the 2020 election data out of all the different years. We have two major parties for this data: Democrats and Republicans. We aggregated the total votes and kept the winning party in the data. We also kept the county FIPS code, state name, county name, total votes received in the winning party and the name of the party.
+
+### Unemployment Data
+
+We kept the unemployment rate for 2020, county FIPS code.
+
+### Poverty Data
+
+We kept the poverty rate for 2019 and the county FIPS code.
+
+### Education Data
+
+We kept the percentage of 4 different education levels: less than a high school diploma, high school diploma, completed between 1 to 3 years of college, and completed four years of college between 2015 and 2019. We also kept the county FIPS code.
+
+```{r}
+Data <- read.csv("https://raw.githubusercontent.com/ChingyiLam/Project1/refs/heads/main/data.csv", stringsAsFactors = TRUE)
+```
+
+# Exploratory Data Analysis
+
+## Summary of Data
+
+Year is the year of the election data.
+
+County_fips is specific number for different county in different state.
+
+State is different states in the United States.
+
+County_name is the name of the county in the states.
+
+Candidatevotes is the amount of people voted for that candidate.
+
+Totalvotes is the total number of vote that people voted.
+
+Party is the winning party of Democrat or Republican.
+
+Unemployment_rate is the unemployment rate in 2020.
+
+Poverty_rate is the poverty rate in 2019
+
+No_high_school is the percentage of people who has education less than a high school diploma.
+
+High_school_only is the percentage of people who has a high school diploma.
+
+Some_college is the percentage of people who completed between 1 to 3 years of college.
+
+Bachelor is the percentage of people who completed four years of college.
+
+```{r}
+summary(Data)
+```
+
+```{r}
+data2 = na.omit(Data)
+```
+
+In the summary below, we removed the missing value from the data.
+
+```{r}
+summary(data2)
+```
+### Summary of Categorical Data
+```{r, fig.align='center', fig.width=8, fig.height=5}
+par(mfrow=c(1,1))
+freq.tbl_1 = table(data2$state)
+barplot(freq.tbl_1, xlab="State", ylab = "Counts", main="Distribution of States", las = 2, cex.names = 0.5)
+```
+
+The bar plot is to show the distribution of the states with counts.
+
+```{r, fig.align='center', fig.width=8, fig.height=5}
+par(mfrow=c(1,1))
+freq.tbl_2 = table(data2$party)
+barplot(freq.tbl_2, xlab="Winning Party", ylab = "Number of Votes", main="Distribution of Winning Party")
+```
+
+The bar plot is to show the distribution of the winning party: Democrat or Republican by county. We can see that Republican has a higher number of votes.
+
+### Summary of Numerical Data
+
+```{r fig.align='center', fig.width=8, fig.height=8}
+par(mfrow = c(2,2))
+hist(data2$candidatevotes, xlab = "Vote", ylab = "Counts", main = "Candidate Votes")
+boxplot(data2$candidatevotes, xlab = "Vote", ylab = "Counts", main = "Candidate Votes", horizontal = TRUE)
+hist(data2$totalvotes, xlab = "Vote", ylab = "counts", main = "Total Votes")
+boxplot(data2$totalvotes, xlab = "Vote", ylab = "Counts", main = "Total Votes", horizontal = TRUE)
+den1 = density(data2$Unemployment_rate)
+plot(den1, xlab = "Unemployment Rate", ylab = "Percentage", main = "Unemployment Rate")
+den2 = density(data2$Poverty_rate)
+plot(den1, xlab = "Poverty Rate", ylab = "Percentage", main = "Poverty Rate")
+boxplot(data2$No_high_school, xlab = "Education Level Less Than a High School Diploma", ylab = "Percentage", main = "Education Level Less Than a High School Diploma")
+boxplot(data2$High_school_only, xlab = "Education Level With a High School Diploma", ylab = "Percentage", main = "Education Level With a High School Diploma")
+```
+```{r fig.align='center', fig.width=8, fig.height=4}
+par(mfrow = c(1,2))
+boxplot(data2$Some_college, xlab = "Completed Some College", ylab = "Percentage", main = "Education Level: Completed Some College (1-3 years")
+boxplot(data2$Bachelor, xlab = "Completed Four Years of College", ylab = "Percentage", main = "Education Level: Completed Four Years of College")
+```
+
+We have histogram and box plot for both candidate votes and total votes. We can see that there are a lot of outliers. Both the candidate votes and the total votes are heavily skewed to the right. After checked the data, we found out that some of the county in some of the states have a big population so the amount of people who voted in the county that is higher such as Los Angeles in California has 3028885 candidate votes and 4264365 total votes while Sierra in California only has 1142 candidate votes and 1931 total votes.
+
+From the unemployment rate graph and poverty rate graph, we can see that when the unemployment rate is high, the poverty rate will follow unemployment to become high. When we looked at the graph, the trend for unemployment rate and poverty rate are similar. They might have a correlated relationship.
+
+When we looked at the box plot for education level less than high school diploma, education level with a high school diploma, completed between 1 to 3 years of college and completed four years of college, we can see that there is more percentage of people has a high school diploma.
+
+
+## Two Variables
+
+### Unemployment Rate and Poverty Rate
+
+```{r fig.align='center'}
+plot(data2$Unemployment_rate, data2$Poverty_rate, xlab = "Unemployment Rate", ylab = "Poverty Rate", main = "Relationship between Unemployment Rate and Poverty Rate")
+```
+
+The above scatter plot indicates a linear trend between the unemployment rate and poverty rate.
+
+### Poverty Rate and Education Levels
+
+```{r fig.align='center', fig.width=8, fig.height=5}
+par(mfrow = c(1,1))
+plot(data2$Poverty_rate, data2$No_high_school, xlab = "Poverty Rate", ylab = "Education Level Less Than a High School Diploma", main = "Relationship between Poverty Rate and Education Level Less Than a High School Diploma")
+```
+
+The above scatter plot indicates a positive linear trend between the poverty rate and percentage of education level less than a high school diploma.
+
+```{r fig.align='center', fig.width=8, fig.height=5}
+par(mfrow = c(1,1))
+plot(data2$Poverty_rate, data2$High_school_only, xlab = "Poverty Rate", ylab = "Education Level With a High School Diploma", main = "Relationship between Poverty Rate and Education Level With a High School Diploma")
+```
+
+The above scatter plot indicates a weak positive linear trend between the poverty rate and percentage of education level with a high school diploma.
+
+```{r fig.align='center', fig.width=8, fig.height=5}
+par(mfrow = c(1,1))
+plot(data2$Poverty_rate, data2$Some_college, xlab = "Poverty Rate", ylab = "Completed Some College", main = "Relationship between Poverty Rate and Completed Some College")
+```
+
+The above scatter plot indicates a weak negative linear trend between the poverty rate and percentage of people completed between 1 to 3 years of college.
+
+```{r fig.align='center', fig.width=8, fig.height=5}
+par(mfrow = c(1,1))
+plot(data2$Poverty_rate, data2$Bachelor, xlab = "Poverty Rate", ylab = "Completed Four Years of College", main = "Relationship between Poverty Rate and Completed Four Years of College")
+```
+
+The above scatter plot indicates a negatively correlated trend between the poverty rate and percentage of people completed four years of college.
+
+### Winning Party and Unemployment Rate
+
+```{r fig.align='center', fig.width=8, fig.height=5, fig.cap="Ridge plot of Relationship between Party and Unemployment Rate."}
+ggplot(data2, aes(x=Unemployment_rate, y=party, fill=party))+
+   geom_density_ridges_gradient(scale = 4) + theme_ridges() +
+    scale_y_discrete(expand = c(0.01, 0)) +
+  scale_x_continuous(expand = c(0.08, 0)) +
+  labs(x = "Unemployment Rate",y = "Party") +
+  ggtitle("Relationship between Winning Party and Unemployment Rate") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+From the graph above we can see that the trend of the relationship between the winning parties and the unemployment rate is similar. This means that the winning party has no clear effect on the unemployment rate.
+
+# Result
+
+From the graphs above, we found out that the unemployment rate and the poverty rate are directly proportional. We also found out the linear relationship between the poverty rate and the education levels. There is no clear relationship between the winning party and the unemployment rate.
+
+## Further Research
+
+It will be interesting to have a linear regression model between the poverty rate and the education levels because as we can see if the people has lower education level, the poverty rate increased. They have a positive linear relationship. However, as the education level increased, the relationship between the poverty rate and the education level is negatively correlated. For doing some of the regression models such as running ANOVA model will be able to confirm our observation of the pattern.
+
+# Appendix
+election <- read.csv("https://pengdsci.github.io/datasets/countypresidential_election_2000-2020.csv")
+unemployment <- read.csv("https://pengdsci.github.io/datasets/Unemployment.csv")
+poverty <- read.csv("https://pengdsci.github.io/datasets/PovertyEstimates.csv")
+education <- read.csv("https://raw.githubusercontent.com/ChingyiLam/Project1/refs/heads/main/Education.csv")
+
+summary(election)
+summary(unemployment)
+summary(poverty)
+summary(education)
+
+con <- dbConnect(drv = SQLite(),
+                 dbname = ":memory:")
+
+dbWriteTable(conn = con, 
+             name = "election",
+             value = election)
+
+dbWriteTable(conn = con, 
+             name = "unemployment",
+             value = unemployment)
+
+dbWriteTable(conn = con, 
+             name = "poverty",
+             value = poverty)
+
+dbWriteTable(conn = con, 
+             name = "education",
+             value = education)
+
+rm(election, unemployment, poverty, education)
+
+tbl(src = con,         
+    "election")      
+tbl(src = con, "unemployment")
+tbl(src = con, "poverty")
+tbl(src = con, "education")
+
+SELECT year, county_fips, state, county_name, candidatevotes, totalvotes, party
+FROM election 
+WHERE year = 2020 AND party in ('DEMOCRAT', 'REPUBLICAN')
+GROUP BY county_fips, state, county_name, party
+ORDER BY county_fips, candidatevotes DESC;
+
+SELECT year, county_fips, state, county_name, candidatevotes, totalvotes, party
+FROM election_new AS e
+WHERE candidatevotes = (
+    SELECT MAX(candidatevotes)
+    FROM election_new AS sub_e
+    WHERE sub_e.county_fips = e.county_fips
+);
+
+SELECT FIPS_code, Attribute, value
+FROM unemployment
+WHERE Attribute = "Unemployment_rate_2019"
+GROUP BY FIPS_Code, value;
+
+SELECT FIPStxt, Attribute, value
+FROM poverty
+WHERE Attribute = "PCTPOVALL_2019"
+GROUP BY FIPStxt, value;
+
+SELECT FIPS, No_high_school, High_school_only, Some_college, Bachelor
+FROM education
+GROUP BY FIPS;
+
+dbWriteTable(conn = con, 
+             name = "election_new",
+             value = election_new)
+             
+dbWriteTable(conn = con, 
+             name = "election_del",
+             value = election_del)
+             
+dbWriteTable(conn = con, 
+             name = "unemployment_new",
+             value = unemployment_new)
+             
+dbWriteTable(conn = con, 
+             name = "poverty_new",
+             value = poverty_new)
+             
+dbWriteTable(conn = con, 
+             name = "education_new",
+             value = education_new)
+             
+SELECT A.year, A.county_fips, A.state, A.county_name, A.candidatevotes, A.totalvotes, A.party, B.value, C.value, D.No_high_school, D.High_school_only, D.Some_college, D.Bachelor
+  FROM election_del AS A
+    FULL JOIN unemployment_new AS B
+      ON A.county_fips = B.FIPS_Code
+    FULL JOIN poverty_new AS C
+      ON A.county_fips = C.fipstxt AND B.fips_code = C.fipstxt
+    FULL JOIN education_new AS D
+      ON A.county_fips = D.FIPS AND B.FIPS_Code = D.FIPS AND C.fipstxt = D.FIPS;
+      
+dbWriteTable(conn = con, 
+             name = "data",
+             value = data)
+             
+write.csv(data, "data.csv", row.names = FALSE)
